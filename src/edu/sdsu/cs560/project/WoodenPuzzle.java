@@ -5,10 +5,12 @@ import java.util.List;
 
 public class WoodenPuzzle {
 
+	public static final String EMPTY_CELL_TEXT = "_";
+
 	public final int width;
 	public final int height;
 	
-	private List<WoodenBlock> blocks = new ArrayList<WoodenBlock>();
+	private List<WoodenBlock> blocks = new ArrayList<>();
 
 	public WoodenPuzzle(int width, int height) {
 		this.width = width;
@@ -33,13 +35,13 @@ public class WoodenPuzzle {
 				boolean found = false;
 				for (WoodenBlock block : blocks) {
 					if (block.isAt(x, y)) {
-						builder.append(block.letter);
+						builder.append(block.name);
 						found = true;
 						break;
 					}
 				}
 				if (!found) {
-					builder.append("-");
+					builder.append(EMPTY_CELL_TEXT);
 				}
 			}
 			builder.append("\n");
