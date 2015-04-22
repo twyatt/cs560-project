@@ -1,4 +1,6 @@
-package edu.sdsu.cs560.project;
+package edu.sdsu.cs560.project.models;
+
+import edu.sdsu.cs560.project.models.WoodenBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +23,7 @@ public class WoodenPuzzle {
 		blocks.add(block);
 		return block;
 	}
-	
-	public int indexOf(int x, int y) {
-		return x + width * y;
-	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -44,7 +42,7 @@ public class WoodenPuzzle {
 					builder.append(EMPTY_CELL_TEXT);
 				}
 			}
-			builder.append("\n");
+			builder.append(System.getProperty("line.separator"));
 		}
 		return builder.toString();
 	}

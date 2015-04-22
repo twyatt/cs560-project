@@ -1,14 +1,16 @@
-package edu.sdsu.cs560.project;
+package edu.sdsu.cs560.project.helpers;
+
+import edu.sdsu.cs560.project.models.WoodenBlock;
+import edu.sdsu.cs560.project.models.WoodenPuzzle;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class WoodenPuzzleBuilder {
 
-	final Map<String, Integer> blocks = new HashMap<>();
-
 	public WoodenPuzzle build(String... lines) {
-		blocks.clear();
+		Map<String, Integer> blocks = new HashMap<>();
+
 		int width = 0;
 		int height = lines.length;
 		String[][] array = new String[height][];

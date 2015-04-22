@@ -1,5 +1,8 @@
 package edu.sdsu.cs560.project;
 
+import edu.sdsu.cs560.project.helpers.WoodenPuzzleBuilder;
+import edu.sdsu.cs560.project.models.WoodenPuzzle;
+
 public class Launcher {
 
 	public static void main(String[] args) {
