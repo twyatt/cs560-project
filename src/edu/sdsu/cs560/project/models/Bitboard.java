@@ -1,5 +1,7 @@
 package edu.sdsu.cs560.project.models;
 
+import java.util.List;
+
 /**
  * A bitboard provides an efficient means of storing grid occupancy information
  * whereas bits are numbered from left to right, top to bottom, starting at 0
@@ -51,7 +53,7 @@ public class Bitboard {
 	 * @param bitboards
 	 * @return
 	 */
-	public static Bitboard combine(Bitboard... bitboards) {
+	public static Bitboard combine(List<? extends Bitboard> bitboards) {
 		Bitboard bitboard = null;
 		for (Bitboard b : bitboards) {
 			if (bitboard == null) {
@@ -64,11 +66,11 @@ public class Bitboard {
 		return bitboard;
 	}
 
-	public void set(int value) {
+	public void setValue(int value) {
 		this.value = value;
 	}
 
-	public int get() {
+	public int getValue() {
 		return value;
 	}
 
@@ -128,7 +130,7 @@ public class Bitboard {
 	 * @return
 	 */
 	public boolean overlaps(Bitboard other) {
-		return (get() & other.get()) != 0;
+		return (getValue() & other.getValue()) != 0;
 	}
 
 	@Override

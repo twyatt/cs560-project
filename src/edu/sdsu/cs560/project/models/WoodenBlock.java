@@ -13,7 +13,15 @@ public class WoodenBlock extends Bitboard {
 		super(puzzle.width, puzzle.height);
 		this.puzzle = puzzle;
 		this.name = name;
-		set(bitboard);
+		setValue(bitboard);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getIndex() {
+		return Integer.numberOfTrailingZeros(Integer.lowestOneBit(getValue())) + 1;
 	}
 
 	@Override
@@ -27,5 +35,5 @@ public class WoodenBlock extends Bitboard {
 		}
 		return builder.toString();
 	}
-	
+
 }

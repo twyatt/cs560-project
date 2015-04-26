@@ -3,7 +3,9 @@ package edu.sdsu.cs560.project.helpers;
 import edu.sdsu.cs560.project.models.WoodenBlock;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WoodenPuzzleBuilder {
@@ -34,9 +36,11 @@ public class WoodenPuzzleBuilder {
 		}
 
 		WoodenPuzzle puzzle = new WoodenPuzzle(width, height);
+		List<WoodenBlock> list = new ArrayList<WoodenBlock>();
 		for (Map.Entry<String, Integer> b : blocks.entrySet()) {
-			puzzle.add(new WoodenBlock(puzzle, b.getKey(), b.getValue()));
+			list.add(new WoodenBlock(puzzle, b.getKey(), b.getValue()));
 		}
+		puzzle.setBlocks(list);
 		return puzzle;
 	}
 
