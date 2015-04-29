@@ -33,6 +33,15 @@ public class Bitboard {
 	public final int width;
 	public final int height;
 	private int value;
+	private int top;
+	private int right;
+	private int bottom;
+	private int left;
+
+	public Bitboard(int width, int height, int value) {
+		this(width, height);
+		setValue(value);
+	}
 
 	public Bitboard(int width, int height) {
 		int size = width * height;
@@ -44,6 +53,47 @@ public class Bitboard {
 
 		this.width = width;
 		this.height = height;
+
+		buildEdges();
+	}
+
+	private void buildEdges() {
+		top = 0;
+		right = 0;
+		bottom = 0;
+		left = 0;
+		for (int x = 0; x < width; x++) {
+			top |= 1 << indexOf(x, 0);
+		}
+		for (int x = 0; x < width; x++) {
+			bottom |= 1 << indexOf(x, height - 1);
+		}
+		for (int y = 0; y < height; y++) {
+			left |= 1 << indexOf(0, y);
+		}
+		for (int y = 0; y < height; y++) {
+			right |= 1 << indexOf(width - 1, y);
+		}
+	}
+
+	public int getBorder() {
+		return top | right | bottom | left;
+	}
+
+	public boolean isAtTop() {
+		return (value & top) != 0;
+	}
+
+	public boolean isAtRight() {
+		return (value & right) != 0;
+	}
+
+	public boolean isAtBottom() {
+		return (value & bottom) != 0;
+	}
+
+	public boolean isAtLeft() {
+		return (value & left) != 0;
 	}
 
 	/**
@@ -78,7 +128,7 @@ public class Bitboard {
 		for (int h = 0; h < height; h++) {
 			value |= ((1 << width) - 1) << indexOf(0, h);
 		}
-		shift(x, y);
+		setValue(shift(x, y));
 	}
 
 	/**
@@ -113,12 +163,12 @@ public class Bitboard {
 	 * @param x
 	 * @param y
 	 */
-	public void shift(int x, int y) {
+	public int shift(int x, int y) {
 		int shift = indexOf(x, y);
 		if (shift < 0) {
-			value >>>= -shift;
+			return value >>> -shift;
 		} else {
-			value <<= shift;
+			return value << shift;
 		}
 	}
 
@@ -130,7 +180,15 @@ public class Bitboard {
 	 * @return
 	 */
 	public boolean overlaps(Bitboard other) {
-		return (getValue() & other.getValue()) != 0;
+		return overlaps(getValue(), other.getValue());
+	}
+
+	public boolean overlaps(int other) {
+		return overlaps(getValue(), other);
+	}
+
+	public static boolean overlaps(int v1, int v2) {
+		return (v1 & v2) != 0;
 	}
 
 	@Override
@@ -138,7 +196,7 @@ public class Bitboard {
 		StringBuilder builder = new StringBuilder();
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				builder.append(" ").append(valueAt(x, y));
+				builder.append(" ").append(isAt(x, y) ? "1" : "0");
 			}
 			builder.append(System.getProperty("line.separator"));
 		}

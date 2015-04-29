@@ -1,10 +1,10 @@
 package edu.sdsu.cs560.project;
 
-import java.util.List;
-
 import edu.sdsu.cs560.project.helpers.WoodenPuzzleBuilder;
 import edu.sdsu.cs560.project.models.WoodenBlock;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
+
+import java.util.List;
 
 public class Launcher {
 
@@ -17,6 +17,8 @@ public class Launcher {
 				"C C D D I"
 		);
 
+		WoodenPuzzleSolver solver = new WoodenPuzzleSolver(puzzle);
+
 		System.out.println(puzzle);
 		List<WoodenBlock> blocks = puzzle.getBlocks();
 		for (int i = 0; i < blocks.size(); i++) {
@@ -24,11 +26,14 @@ public class Launcher {
 			System.out.println("Block " + block.getName() + " @ " + i);
 		}
 		System.out.println(puzzle.getConfiguration());
+		solver.solve();
 
-		puzzle.getBlockByName("F").shift(0, 1);
+		WoodenBlock F = puzzle.getBlockByName("F");
+		F.setValue(F.shift(0, 1));
 
 		System.out.println(puzzle);
 		System.out.println(puzzle.getConfiguration());
+		solver.solve();
 	}
 	
 }
