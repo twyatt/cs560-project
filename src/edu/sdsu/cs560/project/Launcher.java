@@ -14,13 +14,13 @@ public class Launcher {
 				"J J E H  ",
 				"C C D D I"
 		);
+		System.out.println(puzzle);
 
 		WoodenBlock solution = new WoodenBlock(puzzle.getBlockByName("J"));
 		solution.setValue(solution.shift(3, 0));
+		System.out.println(solution);
 
 		WoodenPuzzleSolver solver = new WoodenPuzzleSolver();
-
-		System.out.println(puzzle);
 		solver.solve(puzzle, solution);
 	}
 	
