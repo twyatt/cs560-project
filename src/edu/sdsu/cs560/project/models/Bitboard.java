@@ -33,15 +33,6 @@ public class Bitboard {
 	public final int width;
 	public final int height;
 	private int value;
-	private int top;
-	private int right;
-	private int bottom;
-	private int left;
-
-	public Bitboard(int width, int height, int value) {
-		this(width, height);
-		setValue(value);
-	}
 
 	public Bitboard(int width, int height) {
 		int size = width * height;
@@ -50,50 +41,13 @@ public class Bitboard {
 			String message = name + " size (" + size + ") exceeds integer storage: " + Integer.SIZE + ".";
 			throw new IllegalArgumentException(message);
 		}
-
 		this.width = width;
 		this.height = height;
-
-		buildEdges();
 	}
 
-	private void buildEdges() {
-		top = 0;
-		right = 0;
-		bottom = 0;
-		left = 0;
-		for (int x = 0; x < width; x++) {
-			top |= 1 << indexOf(x, 0);
-		}
-		for (int x = 0; x < width; x++) {
-			bottom |= 1 << indexOf(x, height - 1);
-		}
-		for (int y = 0; y < height; y++) {
-			left |= 1 << indexOf(0, y);
-		}
-		for (int y = 0; y < height; y++) {
-			right |= 1 << indexOf(width - 1, y);
-		}
-	}
-
-	public int getBorder() {
-		return top | right | bottom | left;
-	}
-
-	public boolean isAtTop() {
-		return (value & top) != 0;
-	}
-
-	public boolean isAtRight() {
-		return (value & right) != 0;
-	}
-
-	public boolean isAtBottom() {
-		return (value & bottom) != 0;
-	}
-
-	public boolean isAtLeft() {
-		return (value & left) != 0;
+	public Bitboard(int width, int height, int value) {
+		this(width, height);
+		setValue(value);
 	}
 
 	/**
@@ -116,6 +70,10 @@ public class Bitboard {
 		return bitboard;
 	}
 
+	public void clear() {
+		value = 0;
+	}
+
 	public void setValue(int value) {
 		this.value = value;
 	}
@@ -124,11 +82,24 @@ public class Bitboard {
 		return value;
 	}
 
+	public void draw(int x, int y) {
+		value |= 1 << indexOf(x, y);
+	}
+
 	public void draw(int x, int y, int width, int height) {
-		for (int h = 0; h < height; h++) {
-			value |= ((1 << width) - 1) << indexOf(0, h);
+		for (int i = x; i < x + width; i++) {
+			for (int j = y; j < y + height; j++) {
+				draw(i, j);
+			}
 		}
-		setValue(shift(x, y));
+	}
+
+	public void erase(int x, int y) {
+		value &= ~(1 << indexOf(x, y));
+	}
+
+	public int subtract(Bitboard bitboard) {
+		return value & ~bitboard.getValue();
 	}
 
 	/**
@@ -158,7 +129,11 @@ public class Bitboard {
 	}
 
 	/**
-	 * Shifts bits the specified amount in the X and Y.
+	 * Returns the value of the bitboard with bits shifted the specified amount
+	 * in the X and Y.
+	 *
+	 * The bitboard itself it not updated. To apply a shift call setValue() with
+	 * the returned value from shift().
 	 *
 	 * @param x
 	 * @param y
@@ -180,6 +155,7 @@ public class Bitboard {
 	 * @return
 	 */
 	public boolean overlaps(Bitboard other) {
+		if (other == null) return false;
 		return overlaps(getValue(), other.getValue());
 	}
 

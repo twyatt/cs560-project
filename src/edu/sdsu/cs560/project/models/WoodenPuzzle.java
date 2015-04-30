@@ -9,14 +9,76 @@ public class WoodenPuzzle {
 
 	public static final String EMPTY_CELL_TEXT = "_";
 
+	/*
+	 * Dimensions of the puzzle.
+	 */
 	public final int width;
 	public final int height;
+
+	/*
+	 * Bitboards for the edges of the wooden puzzle, for edge detection.
+	 */
+	private Bitboard top;
+	private Bitboard right;
+	private Bitboard bottom;
+	private Bitboard left;
 	
 	private List<WoodenBlock> blocks = new ArrayList<>();
 
+	public WoodenPuzzle(WoodenPuzzle puzzle) {
+		this(puzzle.width, puzzle.height, false /* build edges */);
+
+		top = puzzle.top;
+		right = puzzle.right;
+		bottom = puzzle.bottom;
+		left = puzzle.left;
+
+		List<WoodenBlock> blocks = new ArrayList<>();
+		for (WoodenBlock block : puzzle.getBlocks()) {
+			blocks.add(new WoodenBlock(block));
+		}
+		setBlocks(blocks);
+	}
+
 	public WoodenPuzzle(int width, int height) {
+		this(width, height, true);
+	}
+
+	public WoodenPuzzle(int width, int height, boolean buildEdges) {
 		this.width = width;
 		this.height = height;
+
+		if (buildEdges) {
+			buildEdges();
+		}
+	}
+
+	private void buildEdges() {
+		top    = new Bitboard(width, height);
+		right  = new Bitboard(width, height);
+		bottom = new Bitboard(width, height);
+		left   = new Bitboard(width, height);
+
+		top.draw   (        0,          0, width,      1);
+		right.draw (width - 1,          0,     1, height);
+		bottom.draw(        0, height - 1, width,      1);
+		left.draw  (        0,          0,     1, height);
+	}
+
+	public boolean isAtTop(WoodenBlock block) {
+		return top.overlaps(block);
+	}
+
+	public boolean isAtRight(WoodenBlock block) {
+		return right.overlaps(block);
+	}
+
+	public boolean isAtBottom(WoodenBlock block) {
+		return bottom.overlaps(block);
+	}
+
+	public boolean isAtLeft(WoodenBlock block) {
+		return left.overlaps(block);
 	}
 	
 	public WoodenPuzzle setBlocks(List<WoodenBlock> blocks) {
@@ -29,8 +91,12 @@ public class WoodenPuzzle {
 		return blocks;
 	}
 
+	static List<WoodenBlock> withEmpties = new ArrayList<>();
+	static List<WoodenBlock> sorted = new ArrayList<>(withEmpties);
+
 	public long getConfiguration() {
-		List<WoodenBlock> withEmpties = new ArrayList<>(blocks);
+		withEmpties.clear();
+		withEmpties.addAll(blocks);
 		int empty = ~Bitboard.combine(blocks).getValue();
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -42,8 +108,9 @@ public class WoodenPuzzle {
 				}
 			}
 		}
-		
-		List<WoodenBlock> sorted = new ArrayList<>(withEmpties);
+
+		sorted.clear();
+		sorted.addAll(withEmpties);
 		Collections.sort(sorted, new Comparator<WoodenBlock>() {
 			@Override
 			public int compare(WoodenBlock o1, WoodenBlock o2) {
@@ -65,11 +132,11 @@ public class WoodenPuzzle {
 
 		for (int i = 0; i < sorted.size(); i++) {
 			WoodenBlock block = sorted.get(i);
-			System.out.println("Block " + block.getName() + " has index of " + withEmpties.indexOf(block));
+//			System.out.println("Block " + block.getName() + " has index of " + withEmpties.indexOf(block));
 			configuration |= (long) withEmpties.indexOf(block) << (i * bitsPerBlock);
-			System.out.println(Long.toBinaryString(configuration));
+//			System.out.println(Long.toBinaryString(configuration));
 		}
-		System.out.println(Long.toBinaryString(configuration));
+//		System.out.println(Long.toBinaryString(configuration));
 		return configuration;
 	}
 

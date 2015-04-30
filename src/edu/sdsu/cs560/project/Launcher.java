@@ -1,6 +1,7 @@
 package edu.sdsu.cs560.project;
 
 import edu.sdsu.cs560.project.helpers.WoodenPuzzleBuilder;
+import edu.sdsu.cs560.project.models.Bitboard;
 import edu.sdsu.cs560.project.models.WoodenBlock;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
 
@@ -17,7 +18,7 @@ public class Launcher {
 				"C C D D I"
 		);
 
-		WoodenPuzzleSolver solver = new WoodenPuzzleSolver(puzzle);
+		WoodenPuzzleSolver solver = new WoodenPuzzleSolver();
 
 		System.out.println(puzzle);
 		List<WoodenBlock> blocks = puzzle.getBlocks();
@@ -26,14 +27,14 @@ public class Launcher {
 			System.out.println("Block " + block.getName() + " @ " + i);
 		}
 		System.out.println(puzzle.getConfiguration());
-		solver.solve();
+		solver.solve(puzzle);
 
-		WoodenBlock F = puzzle.getBlockByName("F");
-		F.setValue(F.shift(0, 1));
-
-		System.out.println(puzzle);
-		System.out.println(puzzle.getConfiguration());
-		solver.solve();
+//		WoodenBlock F = puzzle.getBlockByName("F");
+//		F.setValue(F.shift(0, 1));
+//
+//		System.out.println(puzzle);
+//		System.out.println(puzzle.getConfiguration());
+//		solver.solve();
 	}
 	
 }

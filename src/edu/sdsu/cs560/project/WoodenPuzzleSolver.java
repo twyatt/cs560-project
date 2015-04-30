@@ -5,39 +5,62 @@ import edu.sdsu.cs560.project.models.WoodenBlock;
 import edu.sdsu.cs560.project.models.WoodenBlockMovement;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WoodenPuzzleSolver {
 
-	private final WoodenPuzzle puzzle;
+	private final Map<Long, WoodenPuzzle> visited = new HashMap<>();
 
-	public WoodenPuzzleSolver(WoodenPuzzle puzzle) {
-		this.puzzle = puzzle;
-	}
+	public List<WoodenBlockMovement> solve(WoodenPuzzle p) {
+		int occupied = Bitboard.combine(p.getBlocks()).getValue();
 
-	public List<WoodenBlockMovement> solve() {
-		int occupied = Bitboard.combine(puzzle.getBlocks()).getValue();
-		for (WoodenBlock block : puzzle.getBlocks()) {
-			int o = occupied & ~block.getValue(); // subtract this block from occupancy
+		for (WoodenBlock b : p.getBlocks()) {
+			int o = occupied & ~b.getValue(); // subtract current block from occupancy
 
-			if (!block.isAtTop() && !WoodenBlock.overlaps(block.shift(0, -1), o)) {
+			if (!p.isAtTop(b) && !WoodenBlock.overlaps(b.shift(0, -1), o)) {
 				// can move up
-				System.out.println(block.getName() + " can move up.");
+				System.out.println(b.getName() + " can move up.");
+				move(p, b, 0, -1);
 			}
-			if (!block.isAtRight() && !WoodenBlock.overlaps(block.shift(1, 0), o)) {
+			if (!p.isAtRight(b) && !WoodenBlock.overlaps(b.shift(1, 0), o)) {
 				// can move right
-				System.out.println(block.getName() + " can move right.");
+				System.out.println(b.getName() + " can move right.");
+				move(p, b, 1, 0);
 			}
-			if (!block.isAtBottom() && !WoodenBlock.overlaps(block.shift(0, 1), o)) {
+			if (!p.isAtBottom(b) && !WoodenBlock.overlaps(b.shift(0, 1), o)) {
 				// can move down
-				System.out.println(block.getName() + " can move down.");
+				System.out.println(b.getName() + " can move down.");
+				move(p, b, 0, 1);
 			}
-			if (!block.isAtLeft() && !WoodenBlock.overlaps(block.shift(-1, 0), o)) {
+			if (!p.isAtLeft(b) && !WoodenBlock.overlaps(b.shift(-1, 0), o)) {
 				// can move left
-				System.out.println(block.getName() + " can move left.");
+				System.out.println(b.getName() + " can move left.");
+				move(p, b, -1, 0);
 			}
 		}
 		return null;
+	}
+
+	private void move(WoodenPuzzle puzzle, WoodenBlock block, int dx, int dy) {
+		WoodenPuzzle p = new WoodenPuzzle(puzzle);
+		WoodenBlock b = p.getBlockByName(block.getName());
+		b.setValue(b.shift(dx, dy));
+		long configuration = p.getConfiguration();
+		System.out.println(p);
+
+		// TODO check if the configuration matches the solution configuration
+
+		if (visited.containsKey(configuration)) {
+			// already tried this configuration
+			// TODO check if it took less steps this way than what is already stored, if so, replace existing entry in visited
+			System.out.println("already tried: " + configuration);
+		} else {
+			visited.put(p.getConfiguration(), p);
+			System.out.println("new configuration attempt: " + configuration);
+			solve(p);
+		}
 	}
 
 }

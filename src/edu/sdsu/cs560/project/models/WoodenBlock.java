@@ -5,6 +5,10 @@ public class WoodenBlock extends Bitboard {
 	final WoodenPuzzle puzzle;
 	final String name;
 
+	public WoodenBlock(WoodenBlock block) {
+		this(block.puzzle, block.getName(), block.getValue());
+	}
+
 	public WoodenBlock(WoodenPuzzle puzzle, String name) {
 		this(puzzle, name, 0);
 	}
