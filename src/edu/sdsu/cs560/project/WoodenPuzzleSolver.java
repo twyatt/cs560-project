@@ -8,6 +8,9 @@ import java.util.*;
 
 public class WoodenPuzzleSolver {
 
+	/**
+	 * List of block movement directions.
+	 */
 	static final WoodenBlockMovement.Direction[] DIRECTIONS = WoodenBlockMovement.Direction.values();
 
 	private final Set<WoodenPuzzle> visited = new HashSet<>();
@@ -19,18 +22,34 @@ public class WoodenPuzzleSolver {
 		this.solution = solution;
 	}
 
+	/**
+	 * Initiates the solution search by adding the starting puzzle configuration
+	 * to the queue and marking it as visited.
+	 *
+	 * @param puzzle
+	 * @return
+	 */
 	public List<WoodenBlockMovement> solve(WoodenPuzzle puzzle) {
 		queue.add(puzzle);
 		visited.add(puzzle);
 		return solve();
 	}
 
+	/**
+	 * Continually tries new puzzle configurations until a solution is found, at
+	 * which point it returns a list of movements to the solution puzzle
+	 * configuration.
+	 *
+	 * Breadth-first algorithm is used when searching for the solution.
+	 *
+	 * @return
+	 */
 	private List<WoodenBlockMovement> solve() {
 		while (!queue.isEmpty()) {
 			WoodenPuzzle puzzle = queue.poll();
 			if (isSolution(puzzle)) {
 				queue.clear();
-				return getSolution(puzzle);
+				return getMovements(puzzle);
 			}
 
 			for (WoodenPuzzle nextPuzzle : getPuzzles(puzzle)) {
@@ -45,6 +64,13 @@ public class WoodenPuzzleSolver {
 		return null;
 	}
 
+	/**
+	 * Generates a list of puzzles that can be reached (using valid block moves)
+	 * from the specified puzzle.
+	 *
+	 * @param puzzle
+	 * @return
+	 */
 	private List<WoodenPuzzle> getPuzzles(WoodenPuzzle puzzle) {
 		ArrayList<WoodenPuzzle> puzzles = new ArrayList<>();
 		for (WoodenBlock block : puzzle.getBlocks()) {
@@ -57,12 +83,26 @@ public class WoodenPuzzleSolver {
 		return puzzles;
 	}
 
+	/**
+	 * Determines if the puzzle specified is a solution (determines if the
+	 * "solution" block is in the correct location).
+	 *
+	 * @param puzzle
+	 * @return
+	 */
 	public boolean isSolution(WoodenPuzzle puzzle) {
 		WoodenBlock block = puzzle.getBlockByName(solution.getName());
 		return solution.getValue() == block.getValue();
 	}
 
-	private List<WoodenBlockMovement> getSolution(WoodenPuzzle puzzle) {
+	/**
+	 * Generates an ordered list of block movements that were taken to get to
+	 * the specified puzzle configuration.
+	 *
+	 * @param puzzle
+	 * @return
+	 */
+	private List<WoodenBlockMovement> getMovements(WoodenPuzzle puzzle) {
 		List<WoodenBlockMovement> moves = new ArrayList<>();
 		while (puzzle != null) {
 			moves.add(puzzle.movement);
