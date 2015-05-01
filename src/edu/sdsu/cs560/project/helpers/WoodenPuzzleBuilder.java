@@ -36,7 +36,7 @@ public class WoodenPuzzleBuilder {
 		}
 
 		WoodenPuzzle puzzle = new WoodenPuzzle(width, height);
-		List<WoodenBlock> list = new ArrayList<WoodenBlock>();
+		List<WoodenBlock> list = new ArrayList<>();
 		for (Map.Entry<String, Integer> b : blocks.entrySet()) {
 			list.add(new WoodenBlock(puzzle, b.getKey(), b.getValue()));
 		}

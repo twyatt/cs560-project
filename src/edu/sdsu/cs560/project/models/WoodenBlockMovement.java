@@ -16,4 +16,14 @@ public class WoodenBlockMovement {
 		}
 	}
 
+	private WoodenPuzzle puzzle;
+	public WoodenBlock block;
+	public Direction direction;
+
+	public WoodenBlockMovement(WoodenPuzzle puzzle, WoodenBlock block, Direction direction) {
+		this.puzzle = puzzle;
+		this.block = block;
+		this.direction = direction;
+	}
+
 }

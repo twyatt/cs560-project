@@ -58,16 +58,16 @@ public class Bitboard {
 	 * @return
 	 */
 	public static Bitboard combine(List<? extends Bitboard> bitboards) {
-		Bitboard bitboard = null;
-		for (Bitboard b : bitboards) {
-			if (bitboard == null) {
-				bitboard = new Bitboard(b.width, b.height);
-			} else if (bitboard.width != b.width || bitboard.height != b.height) {
-				throw new IllegalArgumentException("Cannot combine bitboards of unequal sizes.");
+		Bitboard combined = null;
+		for (Bitboard bitboard : bitboards) {
+			if (combined == null) {
+				combined = new Bitboard(bitboard.width, bitboard.height);
+			} else if (combined.width != bitboard.width || combined.height != bitboard.height) {
+				throw new IllegalArgumentException("Cannot combine bitboards of unequal dimensions.");
 			}
-			bitboard.value |= b.value;
+			combined.value |= bitboard.value;
 		}
-		return bitboard;
+		return combined;
 	}
 
 	public void clear() {
@@ -155,7 +155,6 @@ public class Bitboard {
 	 * @return
 	 */
 	public boolean overlaps(Bitboard other) {
-		if (other == null) return false;
 		return overlaps(getValue(), other.getValue());
 	}
 

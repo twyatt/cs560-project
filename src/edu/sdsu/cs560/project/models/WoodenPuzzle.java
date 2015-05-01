@@ -9,6 +9,9 @@ public class WoodenPuzzle {
 
 	public static final String EMPTY_CELL_TEXT = "_";
 
+	public final WoodenPuzzle parent;
+	public final WoodenBlockMovement movement;
+
 	/*
 	 * Dimensions of the puzzle.
 	 */
@@ -16,41 +19,50 @@ public class WoodenPuzzle {
 	public final int height;
 
 	/*
-	 * Bitboards for the edges of the wooden puzzle, for edge detection.
+	 * Bitboards for the edges of the wooden puzzle (used for edge detection).
 	 */
 	private Bitboard top;
 	private Bitboard right;
 	private Bitboard bottom;
 	private Bitboard left;
-	
-	private List<WoodenBlock> blocks = new ArrayList<>();
 
-	public WoodenPuzzle(WoodenPuzzle puzzle) {
-		this(puzzle.width, puzzle.height, false /* build edges */);
+	private Bitboard occupied;
 
-		top = puzzle.top;
-		right = puzzle.right;
-		bottom = puzzle.bottom;
-		left = puzzle.left;
+	List<WoodenBlock> blocks;
+
+	private int hash;
+
+	public WoodenPuzzle(WoodenPuzzle parent, WoodenBlockMovement movement) {
+		this.parent   = parent;
+		this.movement = movement;
+
+		width  = parent.width;
+		height = parent.height;
+
+		top    = parent.top;
+		right  = parent.right;
+		bottom = parent.bottom;
+		left   = parent.left;
 
 		List<WoodenBlock> blocks = new ArrayList<>();
-		for (WoodenBlock block : puzzle.getBlocks()) {
-			blocks.add(new WoodenBlock(block));
+		for (WoodenBlock block : parent.blocks) {
+			blocks.add(new WoodenBlock(this, block));
 		}
 		setBlocks(blocks);
 	}
 
 	public WoodenPuzzle(int width, int height) {
-		this(width, height, true);
-	}
+		parent = null;
+		movement = null;
 
-	public WoodenPuzzle(int width, int height, boolean buildEdges) {
 		this.width = width;
 		this.height = height;
 
-		if (buildEdges) {
-			buildEdges();
-		}
+		buildEdges();
+	}
+
+	public void invalidate() {
+		occupied = null;
 	}
 
 	private void buildEdges() {
@@ -65,79 +77,51 @@ public class WoodenPuzzle {
 		left.draw  (        0,          0,     1, height);
 	}
 
-	public boolean isAtTop(WoodenBlock block) {
-		return top.overlaps(block);
+	public boolean canMove(WoodenBlock block, WoodenBlockMovement.Direction direction) {
+		if (WoodenBlockMovement.Direction.UP.equals(direction) && top.overlaps(block)) {
+			return false;
+		}
+		if (WoodenBlockMovement.Direction.RIGHT.equals(direction) && right.overlaps(block)) {
+			return false;
+		}
+		if (WoodenBlockMovement.Direction.DOWN.equals(direction) && bottom.overlaps(block)) {
+			return false;
+		}
+		if (WoodenBlockMovement.Direction.LEFT.equals(direction) && left.overlaps(block)) {
+			return false;
+		}
+
+		int occupied = getOccupied().getValue() & ~block.getValue();
+		int shift = block.shift(direction.x, direction.y);
+		boolean canMove = !Bitboard.overlaps(shift, occupied);
+//		System.out.println("canMove "+block.getName()+" "+direction+" "+canMove+"...\n"+this+"\n"+ new Bitboard(width, height, occupied) + "\n"+ new Bitboard(width, height, shift));
+		return canMove;
 	}
 
-	public boolean isAtRight(WoodenBlock block) {
-		return right.overlaps(block);
+	private Bitboard getOccupied() {
+		if (occupied == null) {
+			occupied = Bitboard.combine(blocks);
+		}
+		return occupied;
 	}
 
-	public boolean isAtBottom(WoodenBlock block) {
-		return bottom.overlaps(block);
+	public WoodenPuzzle move(WoodenBlock block, WoodenBlockMovement.Direction direction) {
+		WoodenBlockMovement movement = new WoodenBlockMovement(this, block, direction);
+		WoodenPuzzle puzzle = new WoodenPuzzle(this, movement);
+		WoodenBlock toMove = puzzle.getBlockByName(block.getName());
+		toMove.setValue(toMove.shift(direction.x, direction.y));
+		puzzle.invalidate(); // sets occupied to update next time it is requested
+		return puzzle;
 	}
 
-	public boolean isAtLeft(WoodenBlock block) {
-		return left.overlaps(block);
-	}
-	
 	public WoodenPuzzle setBlocks(List<WoodenBlock> blocks) {
-		this.blocks.clear();
-		this.blocks.addAll(blocks);
+		this.blocks = blocks;
+		invalidate();
 		return this;
 	}
 
 	public List<WoodenBlock> getBlocks() {
 		return blocks;
-	}
-
-	static List<WoodenBlock> withEmpties = new ArrayList<>();
-	static List<WoodenBlock> sorted = new ArrayList<>(withEmpties);
-
-	public long getConfiguration() {
-		withEmpties.clear();
-		withEmpties.addAll(blocks);
-		int empty = ~Bitboard.combine(blocks).getValue();
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int index = x + width * y;
-				int bitboard = (1 << index);
-				if ((empty & bitboard) != 0) {
-					WoodenBlock block = new WoodenBlock(this, WoodenPuzzle.EMPTY_CELL_TEXT, bitboard);
-					withEmpties.add(block);
-				}
-			}
-		}
-
-		sorted.clear();
-		sorted.addAll(withEmpties);
-		Collections.sort(sorted, new Comparator<WoodenBlock>() {
-			@Override
-			public int compare(WoodenBlock o1, WoodenBlock o2) {
-				int i1 = Integer.lowestOneBit(o1.getValue());
-				int i2 = Integer.lowestOneBit(o2.getValue());
-
-				if (i1 > i2) {
-					return 1;
-				} else if (i1 < i2) {
-					return -1;
-				} else {
-					return 0;
-				}
-			}
-		});
-
-		long configuration = 0;
-		int bitsPerBlock = Integer.SIZE - Integer.numberOfLeadingZeros(blocks.size());
-
-		for (int i = 0; i < sorted.size(); i++) {
-			WoodenBlock block = sorted.get(i);
-//			System.out.println("Block " + block.getName() + " has index of " + withEmpties.indexOf(block));
-			configuration |= (long) withEmpties.indexOf(block) << (i * bitsPerBlock);
-//			System.out.println(Long.toBinaryString(configuration));
-		}
-//		System.out.println(Long.toBinaryString(configuration));
-		return configuration;
 	}
 
 	public WoodenBlock getBlockByName(String name) {
@@ -148,6 +132,33 @@ public class WoodenPuzzle {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		WoodenPuzzle that = (WoodenPuzzle) o;
+		if (blocks.size() != that.getBlocks().size()) return false;
+		for (int i = 0; i < blocks.size(); i++) {
+			if (blocks.get(i).getValue() != that.getBlocks().get(i).getValue()) return false;
+			if (!blocks.get(i).getName().equals(that.getBlocks().get(i).getName())) return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int h = hash;
+		if (h == 0) {
+			for (WoodenBlock block : blocks) {
+				h += block.getValue();
+			}
+			hash = h;
+		}
+		return h;
 	}
 
 	@Override
@@ -172,5 +183,5 @@ public class WoodenPuzzle {
 		}
 		return builder.toString();
 	}
-	
+
 }

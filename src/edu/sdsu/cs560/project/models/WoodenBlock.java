@@ -5,8 +5,8 @@ public class WoodenBlock extends Bitboard {
 	final WoodenPuzzle puzzle;
 	final String name;
 
-	public WoodenBlock(WoodenBlock block) {
-		this(block.puzzle, block.getName(), block.getValue());
+	public WoodenBlock(WoodenPuzzle puzzle, WoodenBlock block) {
+		this(puzzle, block.getName(), block.getValue());
 	}
 
 	public WoodenBlock(WoodenPuzzle puzzle, String name) {
@@ -38,6 +38,20 @@ public class WoodenBlock extends Bitboard {
 			builder.append(System.getProperty("line.separator"));
 		}
 		return builder.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		WoodenBlock that = (WoodenBlock) o;
+		return getValue() == that.getValue() && getName().equals(that.getName());
+	}
+
+	@Override
+	public int hashCode() {
+		return name != null ? name.hashCode() : 0;
 	}
 
 }

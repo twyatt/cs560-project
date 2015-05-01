@@ -2,7 +2,10 @@ package edu.sdsu.cs560.project;
 
 import edu.sdsu.cs560.project.helpers.WoodenPuzzleBuilder;
 import edu.sdsu.cs560.project.models.WoodenBlock;
+import edu.sdsu.cs560.project.models.WoodenBlockMovement;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
+
+import java.util.List;
 
 public class Launcher {
 
@@ -16,12 +19,16 @@ public class Launcher {
 		);
 		System.out.println(puzzle);
 
-		WoodenBlock solution = new WoodenBlock(puzzle.getBlockByName("J"));
+		WoodenBlock solution = new WoodenBlock(puzzle, puzzle.getBlockByName("J"));
 		solution.setValue(solution.shift(3, 0));
 		System.out.println(solution);
 
-		WoodenPuzzleSolver solver = new WoodenPuzzleSolver();
-		solver.solve(puzzle, solution);
+		WoodenPuzzleSolver solver = new WoodenPuzzleSolver(solution);
+		List<WoodenBlockMovement> moves = solver.solve(puzzle);
+		for (WoodenBlockMovement move : moves) {
+			System.out.println("Move piece at coordinates (?, ?) one unit " + move.direction.toString().toLowerCase());
+		}
+		System.out.println("Solution took " + moves.size() + " moves.");
 	}
-	
+
 }
