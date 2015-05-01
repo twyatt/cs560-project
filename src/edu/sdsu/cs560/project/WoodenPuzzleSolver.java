@@ -13,7 +13,7 @@ public class WoodenPuzzleSolver {
 	 */
 	static final WoodenBlockMovement.Direction[] DIRECTIONS = WoodenBlockMovement.Direction.values();
 
-	private final Set<WoodenPuzzle> visited = new HashSet<>();
+	private final Set<WoodenPuzzle> visited = new HashSet<>(65536);
 	private final Queue<WoodenPuzzle> queue = new LinkedList<>();
 
 	private final WoodenBlock solution;
@@ -40,13 +40,15 @@ public class WoodenPuzzleSolver {
 	 * which point it returns a list of movements to the solution puzzle
 	 * configuration.
 	 *
-	 * Breadth-first algorithm is used when searching for the solution.
+	 * Breadth-first search algorithm is used for finding the solution.
+	 * http://en.wikipedia.org/wiki/Breadth-first_search
 	 *
 	 * @return
 	 */
 	private List<WoodenBlockMovement> solve() {
 		while (!queue.isEmpty()) {
 			WoodenPuzzle puzzle = queue.poll();
+//			System.out.println(getMovements(puzzle).size());
 			if (isSolution(puzzle)) {
 				queue.clear();
 				return getMovements(puzzle);
