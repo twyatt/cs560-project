@@ -62,6 +62,7 @@ public class WoodenPuzzle {
 	}
 
 	public void invalidate() {
+		hash = 0;
 		occupied = null;
 	}
 
