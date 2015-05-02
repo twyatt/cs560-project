@@ -15,7 +15,9 @@ public class WoodenPuzzleSolver {
 	 */
 	static final WoodenBlockMovement.Direction[] DIRECTIONS = WoodenBlockMovement.Direction.values();
 
-	private final Set<WoodenPuzzle> visited = new HashSet<>(16_777_216); // 2^24
+	private static final int INITIAL_CAPACTITY = 1_048_576; // 2^20
+
+	private final List<Set<WoodenPuzzle>> visited = new ArrayList<>();
 	private final Queue<WoodenPuzzle> queue = new LinkedList<>();
 
 	private final int solution;
@@ -35,11 +37,27 @@ public class WoodenPuzzleSolver {
 	 */
 	public WoodenPuzzle solve(WoodenPuzzle puzzle) {
 		long start = System.nanoTime();
+
+		for (int i = 0; i < puzzle.width * puzzle.height; i++) {
+			visited.add(new HashSet<WoodenPuzzle>(INITIAL_CAPACTITY));
+		}
+
 		queue.add(puzzle);
-		visited.add(puzzle);
+		addVisited(puzzle);
+
 		WoodenPuzzle solution = solve();
 		duration = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start);
 		return solution;
+	}
+
+	private void addVisited(WoodenPuzzle puzzle) {
+		int index = Integer.numberOfTrailingZeros(puzzle.blocks[0]);
+		visited.get(index).add(puzzle);
+	}
+
+	private boolean hasVisited(WoodenPuzzle puzzle) {
+		int index = Integer.numberOfTrailingZeros(puzzle.blocks[0]);
+		return visited.get(index).contains(puzzle);
 	}
 
 	public long getDuration() {
@@ -102,9 +120,9 @@ public class WoodenPuzzleSolver {
 			for (int j = 0; j < DIRECTIONS.length; j++) {
 				WoodenPuzzle moved = puzzle.move(i, DIRECTIONS[j]);
 
-				if (moved != null && !visited.contains(moved)) {
+				if (moved != null && !hasVisited(moved)) {
 					queue.add(moved);
-					visited.add(moved);
+					addVisited(moved);
 				}
 			}
 		}
