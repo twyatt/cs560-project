@@ -3,7 +3,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	WoodenPuzzleTest.class,
+		WoodenPuzzleTest.class,
+		BitboardTest.class,
 })
 
 public class AllTests {}

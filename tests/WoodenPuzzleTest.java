@@ -1,5 +1,4 @@
 import edu.sdsu.cs560.project.helpers.WoodenPuzzleBuilder;
-import edu.sdsu.cs560.project.models.Bitboard;
 import edu.sdsu.cs560.project.models.WoodenBlockMovement;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
 import org.junit.Test;
@@ -108,7 +107,6 @@ public class WoodenPuzzleTest {
 		int C = getBlockIndexByName(names, "C");
 		WoodenPuzzle puzzle2 = puzzle1.move(C, WoodenBlockMovement.Direction.DOWN);
 		assertNotNull(puzzle2);
-		System.out.println(Bitboard.toString(puzzle2.occupied, puzzle2.width, puzzle2.height, "1", "0"));
 	}
 
 }

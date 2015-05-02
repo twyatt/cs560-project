@@ -110,7 +110,7 @@ public class WoodenPuzzle {
 		int h = hash;
 		if (h == 0) {
 			for (int i = 0; i < blocks.length; i++) {
-				h = 31*h + blocks[i];
+				h = 31*h + Integer.numberOfTrailingZeros(blocks[i]);
 			}
 			hash = h;
 		}

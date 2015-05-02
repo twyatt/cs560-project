@@ -1,5 +1,7 @@
 package edu.sdsu.cs560.project.models;
 
+import edu.sdsu.cs560.project.helpers.Vector2i;
+
 /**
  * A bitboard provides an efficient means of storing grid occupancy information
  * whereas bits are numbered from left to right, top to bottom, starting at 0
@@ -138,6 +140,11 @@ public class Bitboard {
 	 */
 	public static boolean overlaps(int bitboard1, int bitboard2) {
 		return (bitboard1 & bitboard2) != 0;
+	}
+
+	public static Vector2i position(int bitboard, int width) {
+		int index = Integer.numberOfTrailingZeros(bitboard);
+		return new Vector2i(index % width, index / width);
 	}
 
 	public static String toString(int bitboard, int width, int height, String occupied, String empty) {

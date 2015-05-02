@@ -1,9 +1,12 @@
 package edu.sdsu.cs560.project;
 
+import edu.sdsu.cs560.project.helpers.Vector2i;
+import edu.sdsu.cs560.project.models.Bitboard;
 import edu.sdsu.cs560.project.models.WoodenBlockMovement;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class WoodenPuzzleSolver {
 
@@ -12,12 +15,12 @@ public class WoodenPuzzleSolver {
 	 */
 	static final WoodenBlockMovement.Direction[] DIRECTIONS = WoodenBlockMovement.Direction.values();
 
-	private final Set<WoodenPuzzle> visited = new HashSet<>(1048576);
+	private final Set<WoodenPuzzle> visited = new HashSet<>(16_777_216); // 2^24
 	private final Queue<WoodenPuzzle> queue = new LinkedList<>();
 
 	private final int solution;
-	private int depth;
-	private int lastDepth;
+
+	private long duration;
 
 	public WoodenPuzzleSolver(int solution) {
 		this.solution = solution;
@@ -30,10 +33,44 @@ public class WoodenPuzzleSolver {
 	 * @param puzzle
 	 * @return
 	 */
-	public List<WoodenBlockMovement> solve(WoodenPuzzle puzzle) {
+	public WoodenPuzzle solve(WoodenPuzzle puzzle) {
+		long start = System.nanoTime();
 		queue.add(puzzle);
 		visited.add(puzzle);
-		return solve();
+		WoodenPuzzle solution = solve();
+		duration = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start);
+		return solution;
+	}
+
+	public long getDuration() {
+		return duration;
+	}
+
+	/**
+	 * Generates a list of block movements that were taken to get to the
+	 * specified puzzle.
+	 *
+	 * @param puzzle
+	 * @return
+	 */
+	public List<String> replay(WoodenPuzzle puzzle) {
+		List<String> replay = new ArrayList<>();
+
+		List<WoodenBlockMovement> moves = new ArrayList<>();
+		while (puzzle != null) {
+			if (puzzle.parent == null) break;
+			moves.add(puzzle.movement);
+			puzzle = puzzle.parent;
+		}
+		Collections.reverse(moves);
+
+		for (WoodenBlockMovement move : moves) {
+			Vector2i position = Bitboard.position(puzzle.blocks[move.index], puzzle.width);
+			replay.add("Move piece at coordinates " + position + " one unit " + move.direction.toString().toLowerCase());
+			puzzle = puzzle.move(move.index, move.direction);
+		}
+
+		return replay;
 	}
 
 	/**
@@ -46,20 +83,13 @@ public class WoodenPuzzleSolver {
 	 *
 	 * @return
 	 */
-	private List<WoodenBlockMovement> solve() {
+	private WoodenPuzzle solve() {
 		while (!queue.isEmpty()) {
 			WoodenPuzzle puzzle = queue.poll();
-			depth = getMovements(puzzle).size();
-
-			if (depth != lastDepth) {
-				lastDepth = depth;
-				System.out.println(depth);
-			}
 
 			if (isSolution(puzzle)) {
-				System.out.println(puzzle.toString(Launcher.names));
 				queue.clear();
-				return getMovements(puzzle);
+				return puzzle;
 			}
 
 			queueNextPuzzles(puzzle);
@@ -69,8 +99,8 @@ public class WoodenPuzzleSolver {
 
 	private void queueNextPuzzles(WoodenPuzzle puzzle) {
 		for (int i = 0; i < puzzle.blocks.length; i++) {
-			for (WoodenBlockMovement.Direction direction : DIRECTIONS) {
-				WoodenPuzzle moved = puzzle.move(i, direction);
+			for (int j = 0; j < DIRECTIONS.length; j++) {
+				WoodenPuzzle moved = puzzle.move(i, DIRECTIONS[j]);
 
 				if (moved != null && !visited.contains(moved)) {
 					queue.add(moved);
@@ -86,7 +116,7 @@ public class WoodenPuzzleSolver {
 	 * @param puzzle
 	 * @return
 	 */
-	public boolean isSolution(WoodenPuzzle puzzle) {
+	private boolean isSolution(WoodenPuzzle puzzle) {
 		for (int i = 0; i < puzzle.blocks.length; i++) {
 			if (solution == puzzle.blocks[i]) return true;
 		}
@@ -100,7 +130,7 @@ public class WoodenPuzzleSolver {
 	 * @param puzzle
 	 * @return
 	 */
-	private List<WoodenBlockMovement> getMovements(WoodenPuzzle puzzle) {
+	public List<WoodenBlockMovement> getMovements(WoodenPuzzle puzzle) {
 		List<WoodenBlockMovement> moves = new ArrayList<>();
 		while (puzzle != null) {
 			if (puzzle.movement != null) {
