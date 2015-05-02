@@ -1,8 +1,6 @@
 package edu.sdsu.cs560.project.models;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class WoodenPuzzle {
@@ -155,7 +153,7 @@ public class WoodenPuzzle {
 		int h = hash;
 		if (h == 0) {
 			for (WoodenBlock block : blocks) {
-				h += block.getValue();
+				h = 31*h + block.getValue();
 			}
 			hash = h;
 		}
