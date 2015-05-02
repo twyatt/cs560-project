@@ -1,14 +1,13 @@
 package edu.sdsu.cs560.project.helpers;
 
-import edu.sdsu.cs560.project.models.WoodenBlock;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class WoodenPuzzleBuilder {
+
+	private String[] names;
 
 	public WoodenPuzzle build(String... lines) {
 		Map<String, Integer> blocks = new HashMap<>();
@@ -35,17 +34,23 @@ public class WoodenPuzzleBuilder {
 			}
 		}
 
-		WoodenPuzzle puzzle = new WoodenPuzzle(width, height);
-		List<WoodenBlock> list = new ArrayList<>();
-		for (Map.Entry<String, Integer> b : blocks.entrySet()) {
-			list.add(new WoodenBlock(puzzle, b.getKey(), b.getValue()));
+		int[] b = new int[blocks.size()];
+		names = new String[blocks.size()];
+		int i = 0;
+		for (Map.Entry<String, Integer> block : blocks.entrySet()) {
+			names[i] = block.getKey();
+			b[i] = block.getValue();
+			i++;
 		}
-		puzzle.setBlocks(list);
-		return puzzle;
+		return new WoodenPuzzle(width, height, b);
 	}
 
 	public WoodenPuzzle build(String puzzle) {
 		return build(puzzle.split(System.getProperty("line.separator")));
+	}
+
+	public String[] getNames() {
+		return names;
 	}
 
 }

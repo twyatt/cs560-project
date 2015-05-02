@@ -1,6 +1,5 @@
 package edu.sdsu.cs560.project;
 
-import edu.sdsu.cs560.project.models.WoodenBlock;
 import edu.sdsu.cs560.project.models.WoodenBlockMovement;
 import edu.sdsu.cs560.project.models.WoodenPuzzle;
 
@@ -13,12 +12,14 @@ public class WoodenPuzzleSolver {
 	 */
 	static final WoodenBlockMovement.Direction[] DIRECTIONS = WoodenBlockMovement.Direction.values();
 
-	private final Set<WoodenPuzzle> visited = new HashSet<>(65536);
+	private final Set<WoodenPuzzle> visited = new HashSet<>(1048576);
 	private final Queue<WoodenPuzzle> queue = new LinkedList<>();
 
-	private final WoodenBlock solution;
+	private final int solution;
+	private int depth;
+	private int lastDepth;
 
-	public WoodenPuzzleSolver(WoodenBlock solution) {
+	public WoodenPuzzleSolver(int solution) {
 		this.solution = solution;
 	}
 
@@ -48,53 +49,48 @@ public class WoodenPuzzleSolver {
 	private List<WoodenBlockMovement> solve() {
 		while (!queue.isEmpty()) {
 			WoodenPuzzle puzzle = queue.poll();
-//			System.out.println(getMovements(puzzle).size());
+			depth = getMovements(puzzle).size();
+
+			if (depth != lastDepth) {
+				lastDepth = depth;
+				System.out.println(depth);
+			}
+
 			if (isSolution(puzzle)) {
+				System.out.println(puzzle.toString(Launcher.names));
 				queue.clear();
 				return getMovements(puzzle);
 			}
 
-			for (WoodenPuzzle nextPuzzle : getPuzzles(puzzle)) {
-//				System.out.println(nextPuzzle);
-
-				if (!visited.contains(nextPuzzle)) {
-					queue.add(nextPuzzle);
-					visited.add(nextPuzzle);
-				}
-			}
+			queueNextPuzzles(puzzle);
 		}
 		return null;
 	}
 
-	/**
-	 * Generates a list of puzzles that can be reached (using valid block moves)
-	 * from the specified puzzle.
-	 *
-	 * @param puzzle
-	 * @return
-	 */
-	private List<WoodenPuzzle> getPuzzles(WoodenPuzzle puzzle) {
-		ArrayList<WoodenPuzzle> puzzles = new ArrayList<>();
-		for (WoodenBlock block : puzzle.getBlocks()) {
+	private void queueNextPuzzles(WoodenPuzzle puzzle) {
+		for (int i = 0; i < puzzle.blocks.length; i++) {
 			for (WoodenBlockMovement.Direction direction : DIRECTIONS) {
-				if (puzzle.canMove(block, direction)) {
-					puzzles.add(puzzle.move(block, direction));
+				WoodenPuzzle moved = puzzle.move(i, direction);
+
+				if (moved != null && !visited.contains(moved)) {
+					queue.add(moved);
+					visited.add(moved);
 				}
 			}
 		}
-		return puzzles;
 	}
 
 	/**
-	 * Determines if the puzzle specified is a solution (determines if the
-	 * "solution" block is in the correct location).
+	 * Determines if the puzzle specified is a solution.
 	 *
 	 * @param puzzle
 	 * @return
 	 */
 	public boolean isSolution(WoodenPuzzle puzzle) {
-		WoodenBlock block = puzzle.getBlockByName(solution.getName());
-		return solution.getValue() == block.getValue();
+		for (int i = 0; i < puzzle.blocks.length; i++) {
+			if (solution == puzzle.blocks[i]) return true;
+		}
+		return false;
 	}
 
 	/**
@@ -107,7 +103,9 @@ public class WoodenPuzzleSolver {
 	private List<WoodenBlockMovement> getMovements(WoodenPuzzle puzzle) {
 		List<WoodenBlockMovement> moves = new ArrayList<>();
 		while (puzzle != null) {
-			moves.add(puzzle.movement);
+			if (puzzle.movement != null) {
+				moves.add(puzzle.movement);
+			}
 			puzzle = puzzle.parent;
 		}
 		Collections.reverse(moves);

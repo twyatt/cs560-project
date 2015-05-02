@@ -16,14 +16,19 @@ public class WoodenBlockMovement {
 		}
 	}
 
-	private WoodenPuzzle puzzle;
-	public WoodenBlock block;
+	public int index;
 	public Direction direction;
 
-	public WoodenBlockMovement(WoodenPuzzle puzzle, WoodenBlock block, Direction direction) {
-		this.puzzle = puzzle;
-		this.block = block;
+	public WoodenBlockMovement(int index, Direction direction) {
+		this.index = index;
 		this.direction = direction;
 	}
 
+	@Override
+	public String toString() {
+		return "WoodenBlockMovement{" +
+				"index=" + index +
+				", direction=" + direction +
+				'}';
+	}
 }

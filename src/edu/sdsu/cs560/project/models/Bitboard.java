@@ -1,7 +1,5 @@
 package edu.sdsu.cs560.project.models;
 
-import java.util.List;
-
 /**
  * A bitboard provides an efficient means of storing grid occupancy information
  * whereas bits are numbered from left to right, top to bottom, starting at 0
@@ -30,76 +28,53 @@ import java.util.List;
  */
 public class Bitboard {
 
-	public final int width;
-	public final int height;
-	private int value;
-
-	public Bitboard(int width, int height) {
-		int size = width * height;
-		if (size > Integer.SIZE) {
-			String name = getClass().getSimpleName();
-			String message = name + " size (" + size + ") exceeds integer storage: " + Integer.SIZE + ".";
-			throw new IllegalArgumentException(message);
-		}
-		this.width = width;
-		this.height = height;
-	}
-
-	public Bitboard(int width, int height, int value) {
-		this(width, height);
-		setValue(value);
-	}
-
 	/**
-	 * Creates a new bitboard by combining the occupancy of the specified
-	 * bitboards.
+	 * Returns the value of a bitboard by combining the occupancy of the
+	 * specified bitboards.
 	 *
 	 * @param bitboards
 	 * @return
 	 */
-	public static Bitboard combine(List<? extends Bitboard> bitboards) {
-		Bitboard combined = null;
-		for (Bitboard bitboard : bitboards) {
-			if (combined == null) {
-				combined = new Bitboard(bitboard.width, bitboard.height);
-			} else if (combined.width != bitboard.width || combined.height != bitboard.height) {
-				throw new IllegalArgumentException("Cannot combine bitboards of unequal dimensions.");
-			}
-			combined.value |= bitboard.value;
+	public static int combine(int... bitboards) {
+		int combined = 0;
+		for (int bitboard : bitboards) {
+			combined |= bitboard;
 		}
 		return combined;
 	}
 
-	public void clear() {
-		value = 0;
+	public static int draw(int bitboard, int width, int x, int y) {
+		return bitboard | 1 << indexOf(width, x, y);
 	}
 
-	public void setValue(int value) {
-		this.value = value;
-	}
-
-	public int getValue() {
-		return value;
-	}
-
-	public void draw(int x, int y) {
-		value |= 1 << indexOf(x, y);
-	}
-
-	public void draw(int x, int y, int width, int height) {
-		for (int i = x; i < x + width; i++) {
-			for (int j = y; j < y + height; j++) {
-				draw(i, j);
+	public static int draw(int bitboard, int width, int x, int y, int w, int h) {
+		for (int i = x; i < x + w; i++) {
+			for (int j = y; j < y + h; j++) {
+				bitboard |= 1 << indexOf(width, i, j);
 			}
 		}
+		return bitboard;
 	}
 
-	public void erase(int x, int y) {
-		value &= ~(1 << indexOf(x, y));
+	/**
+	 * Returns the value of the bitboard with the specified point erased.
+	 *
+	 * @param x
+	 * @param y
+	 */
+	public static int erase(int bitboard, int width, int x, int y) {
+		return bitboard & ~(1 << indexOf(width, x, y));
 	}
 
-	public int subtract(Bitboard bitboard) {
-		return value & ~bitboard.getValue();
+	/**
+	 * Returns the value of bitboard1 subtracted by bitboard2.
+	 *
+	 * @param bitboard1
+	 * @param bitboard2
+	 * @return
+	 */
+	public static int subtract(int bitboard1, int bitboard2) {
+		return bitboard1 & ~bitboard2;
 	}
 
 	/**
@@ -109,8 +84,37 @@ public class Bitboard {
 	 * @param y
 	 * @return
 	 */
-	public int indexOf(int x, int y) {
+	public static int indexOf(int width, int x, int y) {
 		return x + width * y;
+	}
+
+	/**
+	 * Determines the value (1 or 0) of the bitboard at the specified X and Y.
+	 *
+	 * @param bitboard
+	 * @param width
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public static int valueAt(int bitboard, int width, int x, int y) {
+		return bitboard & (1 << indexOf(width, x, y));
+	}
+
+	/**
+	 * Returns the value of the bitboard when shifted the specified amount in
+	 * X and Y.
+	 *
+	 * @param x
+	 * @param y
+	 */
+	public static int shift(int bitboard, int width, int x, int y) {
+		int shift = indexOf(width, x, y);
+		if (shift < 0) {
+			return bitboard >>> -shift;
+		} else {
+			return bitboard << shift;
+		}
 	}
 
 	/**
@@ -120,62 +124,30 @@ public class Bitboard {
 	 * @param y
 	 * @return
 	 */
-	public boolean isAt(int x, int y) {
-		return valueAt(x, y) != 0;
-	}
-
-	public int valueAt(int x, int y) {
-		return value & (1 << indexOf(x, y));
+	public static boolean isAt(int bitboard, int width, int x, int y) {
+		return valueAt(bitboard, width, x, y) != 0;
 	}
 
 	/**
-	 * Returns the value of the bitboard with bits shifted the specified amount
-	 * in the X and Y.
+	 * Determines if the two bitboards have any points occupied that overlap
+	 * each other.
 	 *
-	 * The bitboard itself it not updated. To apply a shift call setValue() with
-	 * the returned value from shift().
-	 *
-	 * @param x
-	 * @param y
-	 */
-	public int shift(int x, int y) {
-		int shift = indexOf(x, y);
-		if (shift < 0) {
-			return value >>> -shift;
-		} else {
-			return value << shift;
-		}
-	}
-
-	/**
-	 * Determines if this bitboard has points occupied that overlap occupied
-	 * points on the specified other bitboard.
-	 *
-	 * @param other
+	 * @param bitboard1
+	 * @param bitboard2
 	 * @return
 	 */
-	public boolean overlaps(Bitboard other) {
-		return overlaps(getValue(), other.getValue());
+	public static boolean overlaps(int bitboard1, int bitboard2) {
+		return (bitboard1 & bitboard2) != 0;
 	}
 
-	public boolean overlaps(int other) {
-		return overlaps(getValue(), other);
-	}
-
-	public static boolean overlaps(int v1, int v2) {
-		return (v1 & v2) != 0;
-	}
-
-	@Override
-	public String toString() {
+	public static String toString(int bitboard, int width, int height, String occupied, String empty) {
 		StringBuilder builder = new StringBuilder();
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				builder.append(" ").append(isAt(x, y) ? "1" : "0");
+				builder.append(" ").append(isAt(bitboard, width, x, y) ? occupied : empty);
 			}
 			builder.append(System.getProperty("line.separator"));
 		}
 		return builder.toString();
 	}
-
 }
