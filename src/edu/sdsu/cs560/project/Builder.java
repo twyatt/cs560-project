@@ -1,15 +1,15 @@
-package edu.sdsu.cs560.project.helpers;
+package edu.sdsu.cs560.project;
 
-import edu.sdsu.cs560.project.models.WoodenPuzzle;
+import edu.sdsu.cs560.project.Board;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class WoodenPuzzleBuilder {
+public class Builder {
 
 	private String[] names;
 
-	public WoodenPuzzle build(String... lines) {
+	public Board build(String... lines) {
 		Map<String, Integer> blocks = new HashMap<>();
 
 		int width = 0;
@@ -42,10 +42,10 @@ public class WoodenPuzzleBuilder {
 			b[i] = block.getValue();
 			i++;
 		}
-		return new WoodenPuzzle(width, height, b);
+		return new Board(width, height, b);
 	}
 
-	public WoodenPuzzle build(String puzzle) {
+	public Board build(String puzzle) {
 		return build(puzzle.split(System.getProperty("line.separator")));
 	}
 

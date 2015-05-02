@@ -1,14 +1,21 @@
-package edu.sdsu.cs560.project.models;
+package edu.sdsu.cs560.project;
 
-public class WoodenPuzzle {
+public class Board implements Comparable<Board> {
 
 	public static final String EMPTY_CELL_TEXT = "_";
 
-	public final WoodenPuzzle parent;
-	public final WoodenBlockMovement movement;
+	/**
+	 * Parent to this board.
+	 */
+	public final Board parent;
+
+	/**
+	 * The movement used to get to this board configuration.
+	 */
+	public final Movement movement;
 
 	/*
-	 * Dimensions of the puzzle.
+	 * Dimensions of the board.
 	 */
 	public final int width;
 	public final int height;
@@ -21,13 +28,27 @@ public class WoodenPuzzle {
 	private int bottom;
 	private int left;
 
+	/**
+	 * Bitboard that keeps track of puzzle occupancy.
+	 */
 	public int occupied;
 
+	/**
+	 * Array of bitboards that store occupancy information for each block.
+	 */
 	public int[] blocks;
 
 	private int hash;
 
-	public WoodenPuzzle(WoodenPuzzle parent, WoodenBlockMovement movement) {
+	/**
+	 * Constructor for a new board associated to the specified parent board.
+	 *
+	 * Blocks and occupancy bitboards will be copied over from the parent board.
+	 *
+	 * @param parent
+	 * @param movement
+	 */
+	public Board(Board parent, Movement movement) {
 		this.parent   = parent;
 		this.movement = movement;
 
@@ -45,7 +66,15 @@ public class WoodenPuzzle {
 		System.arraycopy(parent.blocks, 0, blocks, 0, blocks.length);
 	}
 
-	public WoodenPuzzle(int width, int height, int[] blocks) {
+	/**
+	 * Constructor for a new starting board (that will not have an association
+	 * to a parent board).
+	 *
+	 * @param width
+	 * @param height
+	 * @param blocks
+	 */
+	public Board(int width, int height, int[] blocks) {
 		parent   = null;
 		movement = null;
 
@@ -62,19 +91,46 @@ public class WoodenPuzzle {
 		this.blocks = blocks;
 	}
 
-	public WoodenPuzzle move(int index, WoodenBlockMovement.Direction direction) {
+	/**
+	 * Searches for the specified block name in the provided array of block
+	 * names.
+	 *
+	 * @param name
+	 * @param names
+	 * @return Index of block or -1 if block index is not found.
+	 */
+	public static int indexOf(String name, String[] names) {
+		for (int i = 0; i < names.length; i++) {
+			String block = names[i];
+			if (block.equals(name)) return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Moves the block with the specified index in the specified direction and
+	 * returns the new board configuration. No changes will occur to this board.
+	 *
+	 * If the move is not possible (either because of board bounds or block
+	 * overlap) then null is returned.
+	 *
+	 * @param index
+	 * @param direction
+	 * @return
+	 */
+	public Board move(int index, Movement.Direction direction) {
 		int block = blocks[index];
 
-		if (WoodenBlockMovement.Direction.UP.equals(direction) && Bitboard.overlaps(top, block)) {
+		if (Movement.Direction.UP.equals(direction) && Bitboard.overlaps(top, block)) {
 			return null;
 		}
-		if (WoodenBlockMovement.Direction.RIGHT.equals(direction) && Bitboard.overlaps(right, block)) {
+		if (Movement.Direction.RIGHT.equals(direction) && Bitboard.overlaps(right, block)) {
 			return null;
 		}
-		if (WoodenBlockMovement.Direction.DOWN.equals(direction) && Bitboard.overlaps(bottom, block)) {
+		if (Movement.Direction.DOWN.equals(direction) && Bitboard.overlaps(bottom, block)) {
 			return null;
 		}
-		if (WoodenBlockMovement.Direction.LEFT.equals(direction) && Bitboard.overlaps(left, block)) {
+		if (Movement.Direction.LEFT.equals(direction) && Bitboard.overlaps(left, block)) {
 			return null;
 		}
 
@@ -84,11 +140,17 @@ public class WoodenPuzzle {
 			return null;
 		}
 
-		WoodenBlockMovement movement = new WoodenBlockMovement(index, direction);
-		WoodenPuzzle puzzle = new WoodenPuzzle(this, movement);
+		Board puzzle = new Board(this, new Movement(index, direction));
 		puzzle.blocks[index] = block;
 		puzzle.occupied = occupied | block;
 		return puzzle;
+	}
+
+	@Override
+	public int compareTo(Board o) {
+		int thisValue = hashCode();
+		int thatValue = o.hashCode();
+		return (thisValue < thatValue ? -1 : (thisValue == thatValue ? 0 : 1));
 	}
 
 	@Override
@@ -96,7 +158,7 @@ public class WoodenPuzzle {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		WoodenPuzzle that = (WoodenPuzzle) o;
+		Board that = (Board) o;
 		if (blocks.length != that.blocks.length) return false;
 		for (int i = 0; i < blocks.length; i++) {
 			if (blocks[i] != that.blocks[i]) return false;

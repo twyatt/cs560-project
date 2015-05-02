@@ -1,6 +1,6 @@
-package edu.sdsu.cs560.project.models;
+package edu.sdsu.cs560.project;
 
-import edu.sdsu.cs560.project.helpers.Vector2i;
+import edu.sdsu.cs560.project.Vector2i;
 
 /**
  * A bitboard provides an efficient means of storing grid occupancy information
@@ -8,8 +8,8 @@ import edu.sdsu.cs560.project.helpers.Vector2i;
  * and wrapping at the width of the bitboard.
  *
  * For example:
- * A bitboard with a width and height of 3 by 2 would be represented by bits in
- * the following configuration:
+ * A bitboard with a width and height of 3 by 2 would be represented by bits
+ * numbered in the following configuration:
  * .-----------.
  * | 0 | 1 | 2 |
  * |---+---+---|
@@ -18,7 +18,8 @@ import edu.sdsu.cs560.project.helpers.Vector2i;
  *
  * The 2D axis of the bitboard has it's origin in the upperleft corner with the
  * X axis increasing to the right and the Y axis increasing downward. The same
- * bitboard with points (1, 0) and (2, 1) occupied would look as follows:
+ * bitboard shown above, with points (1, 0) and (2, 1) occupied, would look as
+ * follows:
  * .-----------.
  * | 0 | 1 | 0 |
  * |---+---+---|
@@ -91,6 +92,26 @@ public class Bitboard {
 	}
 
 	/**
+	 * Determines the index of the specified bitboard (i.e. the index of the top
+	 * most, left aligned bit).
+	 *
+	 * For example, the following bitboard would have an index of 1, because the
+	 * top-most (first row) has a bit on (in the second column) whereas that
+	 * position on the bitboard is index 1:
+	 * .-----------.
+	 * | 0 | 1 | 0 |
+	 * |---+---+---|
+	 * | 0 | 0 | 1 |
+	 * '-----------'
+	 *
+	 * @param bitboard
+	 * @return
+	 */
+	public static int indexOf(int bitboard) {
+		return Integer.numberOfTrailingZeros(bitboard);
+	}
+
+	/**
 	 * Determines the value (1 or 0) of the bitboard at the specified X and Y.
 	 *
 	 * @param bitboard
@@ -142,9 +163,20 @@ public class Bitboard {
 		return (bitboard1 & bitboard2) != 0;
 	}
 
+	/**
+	 * Determines the position of the first on bit in the specified bitboard.
+	 *
+	 * @param bitboard
+	 * @param width
+	 * @return
+	 */
 	public static Vector2i position(int bitboard, int width) {
-		int index = Integer.numberOfTrailingZeros(bitboard);
+		int index = indexOf(bitboard);
 		return new Vector2i(index % width, index / width);
+	}
+
+	public static String toString(int bitboard, int width, int height) {
+		return toString(bitboard, width, height, "1", "0");
 	}
 
 	public static String toString(int bitboard, int width, int height, String occupied, String empty) {

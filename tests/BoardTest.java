@@ -1,6 +1,6 @@
-import edu.sdsu.cs560.project.helpers.WoodenPuzzleBuilder;
-import edu.sdsu.cs560.project.models.WoodenBlockMovement;
-import edu.sdsu.cs560.project.models.WoodenPuzzle;
+import edu.sdsu.cs560.project.Builder;
+import edu.sdsu.cs560.project.Movement;
+import edu.sdsu.cs560.project.Board;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-public class WoodenPuzzleTest {
+public class BoardTest {
 
 	private int getBlockIndexByName(String[] names, String name) {
 		for (int i = 0; i < names.length; i++) {
@@ -20,14 +20,14 @@ public class WoodenPuzzleTest {
 
 	@Test
 	public void testEquals() throws Exception {
-		WoodenPuzzleBuilder builder = new WoodenPuzzleBuilder();
-		WoodenPuzzle puzzle1 = builder.build(
+		Builder builder = new Builder();
+		Board puzzle1 = builder.build(
 			"A A B B C",
 			"D E F F  ",
 			"G H F F  ",
 			"G H I I J"
 		);
-		WoodenPuzzle puzzle2 = builder.build(
+		Board puzzle2 = builder.build(
 			"A A B B C",
 			"D E F F  ",
 			"G H F F  ",
@@ -53,27 +53,27 @@ public class WoodenPuzzleTest {
 		assertFalse(puzzle1.equals(puzzle2));
 
 		int C = getBlockIndexByName(names, "C");
-		WoodenPuzzle puzzle3 = puzzle1.move(C, WoodenBlockMovement.Direction.DOWN);
+		Board puzzle3 = puzzle1.move(C, Movement.Direction.DOWN);
 		assertFalse(puzzle3.equals(puzzle1));
 		assertFalse(puzzle3.equals(puzzle2));
 
-		WoodenPuzzle puzzle4 = puzzle2.move(C, WoodenBlockMovement.Direction.UP);
+		Board puzzle4 = puzzle2.move(C, Movement.Direction.UP);
 		assertFalse(puzzle4.equals(puzzle2));
 		assertTrue(puzzle4.equals(puzzle3));
 	}
 
 	@Test
 	public void testHashset() throws Exception {
-		Set<WoodenPuzzle> puzzles = new HashSet<>();
+		Set<Board> puzzles = new HashSet<>();
 
-		WoodenPuzzleBuilder builder = new WoodenPuzzleBuilder();
-		WoodenPuzzle puzzle1 = builder.build(
+		Builder builder = new Builder();
+		Board puzzle1 = builder.build(
 				"A A B B C",
 				"D E F F  ",
 				"G H F F  ",
 				"G H I I J"
 		);
-		WoodenPuzzle puzzle2 = builder.build(
+		Board puzzle2 = builder.build(
 				"A A B B  ",
 				"D E F F C",
 				"G H F F  ",
@@ -85,14 +85,14 @@ public class WoodenPuzzleTest {
 		assertFalse(puzzles.contains(puzzle2));
 
 		int C = getBlockIndexByName(names, "C");
-		WoodenPuzzle puzzle3 = puzzle2.move(C, WoodenBlockMovement.Direction.UP);
+		Board puzzle3 = puzzle2.move(C, Movement.Direction.UP);
 		assertTrue(puzzles.contains(puzzle3));
 	}
 
 	@Test
 	public void testMove() throws Exception {
-		WoodenPuzzleBuilder builder = new WoodenPuzzleBuilder();
-		WoodenPuzzle puzzle1 = builder.build(
+		Builder builder = new Builder();
+		Board puzzle1 = builder.build(
 				"A A B B C",
 				"D E F F  ",
 				"G H F F  ",
@@ -101,11 +101,11 @@ public class WoodenPuzzleTest {
 		String[] names = builder.getNames();
 
 		int A = getBlockIndexByName(names, "A");
-		assertNull(puzzle1.move(A, WoodenBlockMovement.Direction.RIGHT));
-		assertNull(puzzle1.move(A, WoodenBlockMovement.Direction.DOWN));
+		assertNull(puzzle1.move(A, Movement.Direction.RIGHT));
+		assertNull(puzzle1.move(A, Movement.Direction.DOWN));
 
 		int C = getBlockIndexByName(names, "C");
-		WoodenPuzzle puzzle2 = puzzle1.move(C, WoodenBlockMovement.Direction.DOWN);
+		Board puzzle2 = puzzle1.move(C, Movement.Direction.DOWN);
 		assertNotNull(puzzle2);
 	}
 

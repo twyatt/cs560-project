@@ -1,4 +1,4 @@
-package edu.sdsu.cs560.project.helpers;
+package edu.sdsu.cs560.project;
 
 public class Vector2i {
 

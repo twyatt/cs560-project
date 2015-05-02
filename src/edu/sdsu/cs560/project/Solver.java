@@ -1,29 +1,33 @@
 package edu.sdsu.cs560.project;
 
-import edu.sdsu.cs560.project.helpers.Vector2i;
-import edu.sdsu.cs560.project.models.Bitboard;
-import edu.sdsu.cs560.project.models.WoodenBlockMovement;
-import edu.sdsu.cs560.project.models.WoodenPuzzle;
-
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class WoodenPuzzleSolver {
+public class Solver {
 
 	/**
 	 * List of block movement directions.
 	 */
-	static final WoodenBlockMovement.Direction[] DIRECTIONS = WoodenBlockMovement.Direction.values();
+	static final Movement.Direction[] DIRECTIONS = Movement.Direction.values();
 
-	private final Set<WoodenPuzzle> visited = new HashSet<>(16_777_216); // 2^24
-	private final Queue<WoodenPuzzle> queue = new LinkedList<>();
+	private final Set<Board> visited = new HashSet<>();
+	private final Queue<Board> queue = new LinkedList<>();
 
+	private final int index;
 	private final int solution;
 
 	private long duration;
 
-	public WoodenPuzzleSolver(int solution) {
+	/**
+	 * Constructor for the solver that will search for the specified bitboard
+	 * solution of the specified block index.
+	 *
+	 * @param solution
+	 * @param index
+	 */
+	public Solver(int solution, int index) {
 		this.solution = solution;
+		this.index = index;
 	}
 
 	/**
@@ -33,11 +37,11 @@ public class WoodenPuzzleSolver {
 	 * @param puzzle
 	 * @return
 	 */
-	public WoodenPuzzle solve(WoodenPuzzle puzzle) {
+	public Board solve(Board puzzle) {
 		long start = System.nanoTime();
 		queue.add(puzzle);
 		visited.add(puzzle);
-		WoodenPuzzle solution = solve();
+		Board solution = solve();
 		duration = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start);
 		return solution;
 	}
@@ -53,10 +57,10 @@ public class WoodenPuzzleSolver {
 	 * @param puzzle
 	 * @return
 	 */
-	public List<String> replay(WoodenPuzzle puzzle) {
+	public List<String> replay(Board puzzle) {
 		List<String> replay = new ArrayList<>();
 
-		List<WoodenBlockMovement> moves = new ArrayList<>();
+		List<Movement> moves = new ArrayList<>();
 		while (puzzle != null) {
 			if (puzzle.parent == null) break;
 			moves.add(puzzle.movement);
@@ -64,7 +68,7 @@ public class WoodenPuzzleSolver {
 		}
 		Collections.reverse(moves);
 
-		for (WoodenBlockMovement move : moves) {
+		for (Movement move : moves) {
 			Vector2i position = Bitboard.position(puzzle.blocks[move.index], puzzle.width);
 			replay.add("Move piece at coordinates " + position + " one unit " + move.direction.toString().toLowerCase());
 			puzzle = puzzle.move(move.index, move.direction);
@@ -83,24 +87,31 @@ public class WoodenPuzzleSolver {
 	 *
 	 * @return
 	 */
-	private WoodenPuzzle solve() {
+	private Board solve() {
 		while (!queue.isEmpty()) {
-			WoodenPuzzle puzzle = queue.poll();
+			Board puzzle = queue.poll();
 
 			if (isSolution(puzzle)) {
 				queue.clear();
 				return puzzle;
 			}
+//			System.out.println(getMovements(puzzle).size());
 
 			queueNextPuzzles(puzzle);
 		}
 		return null;
 	}
 
-	private void queueNextPuzzles(WoodenPuzzle puzzle) {
+	/**
+	 * Queues puzzles of possible configurations for processing, based on the
+	 * provided puzzle configuration.
+	 *
+	 * @param puzzle
+	 */
+	private void queueNextPuzzles(Board puzzle) {
 		for (int i = 0; i < puzzle.blocks.length; i++) {
 			for (int j = 0; j < DIRECTIONS.length; j++) {
-				WoodenPuzzle moved = puzzle.move(i, DIRECTIONS[j]);
+				Board moved = puzzle.move(i, DIRECTIONS[j]);
 
 				if (moved != null && !visited.contains(moved)) {
 					queue.add(moved);
@@ -116,11 +127,8 @@ public class WoodenPuzzleSolver {
 	 * @param puzzle
 	 * @return
 	 */
-	private boolean isSolution(WoodenPuzzle puzzle) {
-		for (int i = 0; i < puzzle.blocks.length; i++) {
-			if (solution == puzzle.blocks[i]) return true;
-		}
-		return false;
+	private boolean isSolution(Board puzzle) {
+		return puzzle.blocks[index] == solution;
 	}
 
 	/**
@@ -130,8 +138,8 @@ public class WoodenPuzzleSolver {
 	 * @param puzzle
 	 * @return
 	 */
-	public List<WoodenBlockMovement> getMovements(WoodenPuzzle puzzle) {
-		List<WoodenBlockMovement> moves = new ArrayList<>();
+	public List<Movement> getMovements(Board puzzle) {
+		List<Movement> moves = new ArrayList<>();
 		while (puzzle != null) {
 			if (puzzle.movement != null) {
 				moves.add(puzzle.movement);

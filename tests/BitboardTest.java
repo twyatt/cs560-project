@@ -1,5 +1,5 @@
-import edu.sdsu.cs560.project.helpers.Vector2i;
-import edu.sdsu.cs560.project.models.Bitboard;
+import edu.sdsu.cs560.project.Vector2i;
+import edu.sdsu.cs560.project.Bitboard;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
