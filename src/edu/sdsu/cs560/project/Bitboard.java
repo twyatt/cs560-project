@@ -1,7 +1,5 @@
 package edu.sdsu.cs560.project;
 
-import edu.sdsu.cs560.project.Vector2i;
-
 /**
  * A bitboard provides an efficient means of storing grid occupancy information
  * whereas bits are numbered from left to right, top to bottom, starting at 0
@@ -203,6 +201,39 @@ public class Bitboard {
 		}
 
 		return new Vector2i(x2 - x1 + 1, y2 - y1 + 1);
+	}
+
+	/**
+	 * Determines the "shape" of the on bits in the bitboard. This can be seen
+	 * as an ID for the arrangement of on bits.
+	 *
+	 * For example, the following two bitboards would have the same "shape":
+	 *
+	 * 000000    000101
+	 * 001010 == 001111
+	 * 011110    000000
+	 *
+	 * @param bitboard
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static int shape(int bitboard, int width, int height) {
+		if (bitboard == 0) return 0;
+
+		int x0 = Integer.MAX_VALUE;
+		int y0 = Integer.MAX_VALUE;
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (isAt(bitboard, width, x, y)) {
+					x0 = Math.min(x0, x);
+					y0 = Math.min(y0, y);
+				}
+			}
+		}
+
+		return Bitboard.shift(bitboard, width, -x0, -y0);
 	}
 
 	public static String toString(int bitboard, int width, int height) {

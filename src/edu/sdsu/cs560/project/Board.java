@@ -83,6 +83,10 @@ public class Board implements Comparable<Board> {
 	 * @param blocks
 	 */
 	public Board(int width, int height, int[] blocks, int[] groups) {
+		if (width * height > Integer.SIZE) {
+			throw new IllegalArgumentException("Requested board size exceeds maximum supported.");
+		}
+
 		parent   = null;
 		movement = null;
 

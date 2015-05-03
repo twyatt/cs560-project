@@ -42,10 +42,15 @@ public class Solver {
 		queue.add(puzzle);
 		visited.add(puzzle);
 		Board solution = solve();
-		duration = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start);
+		duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 		return solution;
 	}
 
+	/**
+	 * Retrieves the time it took to solve the puzzle.
+	 *
+	 * @return Solution time in milliseconds.
+	 */
 	public long getDuration() {
 		return duration;
 	}

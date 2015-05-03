@@ -37,7 +37,9 @@ public class Launcher {
 		for (String move : moves) {
 			System.out.println(move);
 		}
-		System.out.println("Solution took " + solver.getDuration() + " seconds and " + moves.size() + " moves.");
+
+		System.out.println();
+		System.out.println("Solution took " + (solver.getDuration() / 1000f) + " seconds and " + moves.size() + " moves.");
 	}
 
 }

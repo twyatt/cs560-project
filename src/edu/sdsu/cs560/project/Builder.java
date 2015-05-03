@@ -36,7 +36,7 @@ public class Builder {
 			}
 		}
 
-		Map<Vector2i, List<Integer>> groups = new HashMap<>();
+		Map<Integer, List<Integer>> groups = new HashMap<>();
 
 		int[] b = new int[blocks.size()];
 		names = new String[blocks.size()];
@@ -45,12 +45,12 @@ public class Builder {
 			names[i] = block.getKey(); // build names array
 			b[i] = block.getValue(); // build blocks array
 
-			// build groups
-			Vector2i size = Bitboard.size(block.getValue(), width, height);
-			List<Integer> group = groups.get(size);
+			// build groups based on bitboard "shape"
+			Integer shape = Bitboard.shape(block.getValue(), width, height);
+			List<Integer> group = groups.get(shape);
 			if (group == null) {
 				group = new ArrayList<>();
-				groups.put(size, group);
+				groups.put(shape, group);
 			}
 			group.add(block.getValue());
 
@@ -59,7 +59,7 @@ public class Builder {
 
 		// build groups
 		List<Integer> groupValues = new ArrayList<>();
-		for (Map.Entry<Vector2i, List<Integer>> group : groups.entrySet()) {
+		for (Map.Entry<Integer, List<Integer>> group : groups.entrySet()) {
 			int v = 0;
 			if (group.getValue().size() > 1) {
 				for (int g : group.getValue()) {
