@@ -175,6 +175,36 @@ public class Bitboard {
 		return new Vector2i(index % width, index / width);
 	}
 
+	/**
+	 * Determines the width and height of the on bits in the specified bitboard.
+	 *
+	 * @param bitboard
+	 * @param width Bitboard width
+	 * @param height Bitboard height
+	 * @return
+	 */
+	public static Vector2i size(int bitboard, int width, int height) {
+		if (bitboard == 0) return new Vector2i(0, 0);
+
+		int x1 = Integer.MAX_VALUE;
+		int x2 = Integer.MIN_VALUE;
+		int y1 = Integer.MAX_VALUE;
+		int y2 = Integer.MIN_VALUE;
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (isAt(bitboard, width, x, y)) {
+					x1 = Math.min(x1, x);
+					x2 = Math.max(x2, x);
+					y1 = Math.min(y1, y);
+					y2 = Math.max(y2, y);
+				}
+			}
+		}
+
+		return new Vector2i(x2 - x1 + 1, y2 - y1 + 1);
+	}
+
 	public static String toString(int bitboard, int width, int height) {
 		return toString(bitboard, width, height, "1", "0");
 	}

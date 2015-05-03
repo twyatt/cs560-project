@@ -2,7 +2,9 @@ package edu.sdsu.cs560.project;
 
 import edu.sdsu.cs560.project.Board;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Builder {
@@ -34,15 +36,43 @@ public class Builder {
 			}
 		}
 
+		Map<Vector2i, List<Integer>> groups = new HashMap<>();
+
 		int[] b = new int[blocks.size()];
 		names = new String[blocks.size()];
 		int i = 0;
 		for (Map.Entry<String, Integer> block : blocks.entrySet()) {
-			names[i] = block.getKey();
-			b[i] = block.getValue();
+			names[i] = block.getKey(); // build names array
+			b[i] = block.getValue(); // build blocks array
+
+			// build groups
+			Vector2i size = Bitboard.size(block.getValue(), width, height);
+			List<Integer> group = groups.get(size);
+			if (group == null) {
+				group = new ArrayList<>();
+				groups.put(size, group);
+			}
+			group.add(block.getValue());
+
 			i++;
 		}
-		return new Board(width, height, b);
+
+		// build groups
+		List<Integer> groupValues = new ArrayList<>();
+		for (Map.Entry<Vector2i, List<Integer>> group : groups.entrySet()) {
+			int v = 0;
+			if (group.getValue().size() > 1) {
+				for (int g : group.getValue()) {
+					v |= g;
+				}
+				groupValues.add(v);
+			}
+		}
+		int[] theGroups = new int[groupValues.size()];
+		for (int j = 0; j < theGroups.length; j++) {
+			theGroups[j] = groupValues.get(j).intValue();
+		}
+		return new Board(width, height, b, theGroups);
 	}
 
 	public Board build(String puzzle) {

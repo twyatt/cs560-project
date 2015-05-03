@@ -34,6 +34,11 @@ public class Board implements Comparable<Board> {
 	public int occupied;
 
 	/**
+	 * Array of bitboards that store group occupancy for the blocks.
+	 */
+	public int[] groups;
+
+	/**
 	 * Array of bitboards that store occupancy information for each block.
 	 */
 	public int[] blocks;
@@ -62,6 +67,9 @@ public class Board implements Comparable<Board> {
 
 		occupied = parent.occupied;
 
+		groups = new int[parent.groups.length];
+		System.arraycopy(parent.groups, 0, groups, 0, groups.length);
+
 		blocks = new int[parent.blocks.length];
 		System.arraycopy(parent.blocks, 0, blocks, 0, blocks.length);
 	}
@@ -74,7 +82,7 @@ public class Board implements Comparable<Board> {
 	 * @param height
 	 * @param blocks
 	 */
-	public Board(int width, int height, int[] blocks) {
+	public Board(int width, int height, int[] blocks, int[] groups) {
 		parent   = null;
 		movement = null;
 
@@ -87,7 +95,7 @@ public class Board implements Comparable<Board> {
 		left   = Bitboard.draw(0, width,         0,          0,     1, height);
 
 		occupied = Bitboard.combine(blocks);
-
+		this.groups = groups;
 		this.blocks = blocks;
 	}
 
@@ -135,15 +143,36 @@ public class Board implements Comparable<Board> {
 		}
 
 		int occupied = Bitboard.subtract(this.occupied, block);
-		block = Bitboard.shift(block, width, direction.x, direction.y);
-		if (Bitboard.overlaps(occupied, block)) {
+		int moved = Bitboard.shift(block, width, direction.x, direction.y);
+		if (Bitboard.overlaps(occupied, moved)) {
 			return null;
 		}
 
+		int group = getMembership(index);
+
 		Board puzzle = new Board(this, new Movement(index, direction));
-		puzzle.blocks[index] = block;
-		puzzle.occupied = occupied | block;
+		puzzle.blocks[index] = moved;
+		puzzle.occupied = occupied | moved;
+		if (group != -1) {
+			puzzle.groups[group] = Bitboard.subtract(groups[group], block) | moved;
+		}
 		return puzzle;
+	}
+
+	/**
+	 * Retrieves the group index that the block with the specified index is a
+	 * member of.
+	 *
+	 * @param i
+	 * @return Group index or -1 if block with specified index is not in a group
+	 */
+	public int getMembership(int i) {
+		for (int j = 0; j < groups.length; j++) {
+			if (Bitboard.overlaps(blocks[i], groups[j])) {
+				return j;
+			}
+		}
+		return -1;
 	}
 
 	@Override
@@ -159,9 +188,18 @@ public class Board implements Comparable<Board> {
 		if (o == null || getClass() != o.getClass()) return false;
 
 		Board that = (Board) o;
+
 		if (blocks.length != that.blocks.length) return false;
+		if (groups.length != that.groups.length) return false;
+
+		for (int i = 0; i < groups.length; i++) {
+			if (groups[i] != that.groups[i]) return false;
+		}
+
 		for (int i = 0; i < blocks.length; i++) {
-			if (blocks[i] != that.blocks[i]) return false;
+			if (getMembership(i) == -1) {
+				if (blocks[i] != that.blocks[i]) return false;
+			}
 		}
 
 		return true;
@@ -171,8 +209,13 @@ public class Board implements Comparable<Board> {
 	public int hashCode() {
 		int h = hash;
 		if (h == 0) {
+			for (int i = 0; i < groups.length; i++) {
+				h = 31*h + groups[i];
+			}
 			for (int i = 0; i < blocks.length; i++) {
-				h = 31*h + Integer.numberOfTrailingZeros(blocks[i]);
+				if (getMembership(i) == -1) {
+					h = 31*h + Integer.numberOfTrailingZeros(blocks[i]);
+				}
 			}
 			hash = h;
 		}

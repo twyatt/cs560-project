@@ -95,7 +95,7 @@ public class Solver {
 				queue.clear();
 				return puzzle;
 			}
-//			System.out.println(getMovements(puzzle).size());
+//			System.out.println(queue.size() + "\t" + getMovements(puzzle).size());
 
 			queueNextPuzzles(puzzle);
 		}

@@ -16,6 +16,23 @@ public class Vector2i {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Vector2i that = (Vector2i) o;
+
+		if (x != that.x) return false;
+		return y == that.y;
+
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 * x + y;
+	}
+
+	@Override
 	public String toString() {
 		return "(" + x + ", " + y + ")";
 	}
