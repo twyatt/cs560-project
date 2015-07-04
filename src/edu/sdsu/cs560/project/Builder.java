@@ -2,14 +2,52 @@ package edu.sdsu.cs560.project;
 
 import edu.sdsu.cs560.project.Board;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 public class Builder {
 
 	private String[] names;
+
+	/**
+	 * Reads board from specified file.
+	 *
+	 * @param file
+	 * @return
+	 */
+	public Board build(File file) throws FileNotFoundException {
+		FileInputStream stream = new FileInputStream(file);
+		Board board = build(stream);
+		try {
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return board;
+	}
+
+	/**
+	 * Reads board from input stream. Note that the input stream is not closed.
+	 *
+	 * @param stream
+	 * @return
+	 */
+	public Board build(InputStream stream) {
+		// http://stackoverflow.com/a/5445161/196486
+		Scanner scanner = new java.util.Scanner(stream).useDelimiter("\\A");
+		String string = scanner.hasNext() ? scanner.next() : "";
+		return build(string);
+	}
+
+	/**
+	 * Reads board from the provided newline delimited string.
+	 *
+	 * @param puzzle
+	 * @return
+	 */
+	public Board build(String puzzle) {
+		return build(puzzle.split(System.getProperty("line.separator")));
+	}
 
 	public Board build(String... lines) {
 		Map<String, Integer> blocks = new HashMap<>();
@@ -73,10 +111,6 @@ public class Builder {
 			theGroups[j] = groupValues.get(j).intValue();
 		}
 		return new Board(width, height, b, theGroups);
-	}
-
-	public Board build(String puzzle) {
-		return build(puzzle.split(System.getProperty("line.separator")));
 	}
 
 	public String[] getNames() {

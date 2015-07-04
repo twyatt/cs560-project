@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 public class Solver {
 
 	/**
-	 * List of block movement directions.
+	 * Array of block movement directions.
 	 */
 	static final Movement.Direction[] DIRECTIONS = Movement.Direction.values();
 
@@ -100,7 +100,6 @@ public class Solver {
 				queue.clear();
 				return puzzle;
 			}
-//			System.out.println(queue.size() + "\t" + getMovements(puzzle).size());
 
 			queueNextPuzzles(puzzle);
 		}
